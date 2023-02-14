@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>THR ONLINE</title>
+        <script src="https://cdn.jsdelivr.net/npm/webmidi@latest/dist/iife/webmidi.iife.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.3.min.js" integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
+        <script src="scripts.js"></script>
+        <link rel="stylesheet" href="./style.css">
+    </head>
+    <body>
+        <header>
+            <h1>THR Online</h1>
+
+            <div class="presets">
+                <button class="preset" style="position: relative">1</button>
+                <button class="preset" style="position: relative">2</button>
+                <button class="preset" style="position: relative">3</button>
+                <button class="preset" style="position: relative">4</button>
+                <button class="preset" style="position: relative">5</button>
+                <span class="user-memory">USER MEMORY</span>
+            </div>
+
+        </header>
+        <div class="container">
+
+            <div class="model_control controls_container">
+                <button id="classic_lead" class="left">Lead<div class="led"></div></button>
+                <button id="classic_special" class="left">Special<div class="led"></div></button>
+                <button id="classic_high_gain" class="left">High gain<div class="led"></div></button>
+                <button id="classic_crunch" class="left">Crunch<div class="led"></div></button>
+                <button id="classic_clean" class="left">Clean<div class="led"></div></button>
+                <button id="classic_bass" class="right">Bass<div class="led"></div></button>
+                <button id="classic_aco" class="right">Acoustic<div class="led"></div></button>
+                <button id="flat" class="right">Flat<div class="led"></div></button>
+                <img class="knob" id="model_knob" data-slider="model_select" />
+                <input type="range" min="1" max="8" value="1" class="slider" id="model_select">
+            </div>
+
+            <div class="tone_control controls_container">
+                <div class="control">
+                    <span class="value" id="gain_value">50</span>
+                    <img class="knob" id="gain_knob" data-slider="gain_slider" />
+                    <span class="knob_label">Gain</span>
+                    <span class="dots"></span>
+                    <input data-knob="gain_knob" data-value="gain_value" type="range" min="0" max="100" value="50" class="slider" id="gain_slider">
+                </div>
+                <div class="control">
+                    <span class="value" id="master_value">50</span>
+                    <img class="knob" id="master_knob" data-slider="master_slider" />
+                    <span class="knob_label">Master</span>
+                    <span class="dots"></span>
+                    <input data-knob="master_knob" data-value="master_value" type="range" min="0" max="100" value="50" class="slider" id="master_slider">
+                </div>
+                <div class="control">
+                    <span class="value" id="bass_value">50</span>
+                    <img class="knob" id="bass_knob" data-slider="bass_slider" />
+                    <span class="knob_label">Bass</span>
+                    <span class="dots"></span>
+                    <input data-knob="bass_knob" data-value="bass_value" type="range" min="0" max="100" value="50" class="slider" id="bass_slider">
+                </div>
+                <div class="control">
+                    <span class="value" id="mid_value">50</span>
+                    <img class="knob" id="mid_knob" data-slider="mid_slider" />
+                    <span class="knob_label">Mid</span>
+                    <span class="dots"></span>
+                    <input data-knob="mid_knob" data-value="mid_value" type="range" min="0" max="100" value="50" class="slider" id="mid_slider">
+                </div>
+                <div class="control">
+                    <span class="value" id="treble_value">50</span>
+                    <img class="knob" id="treble_knob" data-slider="treble_slider" />
+                    <span class="knob_label">Treble</span>
+                    <span class="dots"></span>
+                    <input data-knob="treble_knob" data-value="treble_value" type="range" min="0" max="100" value="50" class="slider" id="treble_slider">
+                </div>
+            </div>
+        </div>
+
+        <input type="checkbox" id="console_toggle">
+        <label for="console_toggle" id="console_toggle_label" title="Console"></label>
+        <div id="console"></div>
+
+    </body>
+    <script type="module">
+        var linenum = 0;
+        console.log('starting');
+        var the_console = document.getElementById('console');
+
+        function thr_console(line) {
+            console.log(line);
+            var thr_console = document.getElementById('console');
+            thr_console.innerHTML += linenum.toString().padStart(4, '0')+") "+line+"<br>";
+            thr_console.scrollTop += 100;
+            linenum++;
+        }
+
+        var data = ["00", "04", "00", "00", "00", "96", "FF"];
+        console.log('input data', data);
+        var bb_data = create_bitbucket(data);
+        console.log('bit bucketed data', bb_data);
+        var raw_data = undo_bitbucket(bb_data);
+        console.log('raw data', raw_data);
+
+        var data = ["ff", "ff", "ff", "ff", "55", "01", "00"];
+        console.log('input data', data);
+        var bb_data = create_bitbucket(data);
+        console.log('bit bucketed data', bb_data);
+        var raw_data = undo_bitbucket(bb_data);
+        console.log('raw data', raw_data);
+
+
+
+        function decode_input(data) {
+            var a = [];
+            data.forEach(function(d) {
+                a.push(d.toString(16).padStart(2, '0').toUpperCase());
+            });
+
+            var str = '';
+
+            if (a[1]+a[2]+a[3] == '00010C') {
+                str += 'Line6 ';
+            }
+            if (a[4] == '24') {
+                str += 'THRII ';
+            }
+            if (a[5]+a[6] == '004D') {
+                str += 'THR10II ';
+            } else 
+            if (a[5]+a[6] == '014D') {
+                str += 'THR10IIWireless ';
+            } else 
+            if (a[5]+a[6] == '024D') {
+                str += 'THR30IIWireless ';
+            } else 
+            if (a[5]+a[6] == '034D') {
+                str += 'THR30IIAcousticWireless ';
+            }
+            if (a[7] == '00') {
+                str += 'A ';
+            } else 
+            if (a[7] == '01') {
+                str += 'B ';
+            }
+            str += 'Msg '+a[8]+' ';
+
+            // This bit needs some work
+            str += 'Last valid byte '+parseInt(a[9]+a[10]+a[11], 16).toString(10);
+
+            var current = 12;
+            var tmp = '';
+            var arr = [];
+
+            // while var is true
+                // get current byte, store as bb
+                // get remaining 7 bytes as array
+                // send to function that converts to 7 bit binary, appends each digit of bb to other bytes and returns array of 7 8 bit bytes
+            for (var i = 0; i < 8; i ++) {     // for every 8 bytes
+                if (i == 0) {
+                    tmp = ' (';
+                    arr = [];
+                }
+
+                arr.push(a[current + i]);
+                tmp += a[current + i];
+
+                if (i == 7) {
+
+                    //console.log(arr);
+                    arr = [];
+                    str += tmp;
+                    str += ') ';
+                    if (a[current + i + 1] != 'F7') {
+                        i = -1;
+                    }
+
+                    current += 8;
+                }
+            }
+
+
+            console.log('decoded message', str);
+
+            console.log('encoded data', a);
+        }
+
+        WebMidi
+            .enable(function (err) {
+                if (err) {
+                    thr_console("WebMidi could not be enabled");
+                    the_console.innerHTML += "WebMidi could not be enabled<br>";
+                } else {
+                    if (WebMidi.inputs.length == 0) {
+                        thr_console("Not connected");
+                        return;
+                    }
+                    var thr_in = WebMidi.inputs[0];
+                    var thr_out = WebMidi.outputs[0];
+
+                    thr_console("Connected to "+thr_in.name);
+
+                    thr_in.addListener("sysex", "all", function (e) {
+                        console.log(e);
+                        if (e.data) {
+                            var data = '';
+                            e.data.forEach(function(d) {
+                                data += d.toString(16).padStart(2, '0').toUpperCase()+" ";
+                            });
+                            thr_console(data);
+                            decode_input(e.data);
+                        }
+                    });
+
+                    setTimeout(() => {
+                        thr_console("Init message");
+                        thr_out.send([0xf0, 0x7E, 0x7F, 0x06, 0x01, 0xf7]);
+                        setTimeout(() => {
+                            thr_console("Request firmware version");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x00, 0x00, 0x00, 0x07, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7])
+                            setTimeout(() => {
+                                thr_console("Sending header");
+                                thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x01, 0x00, 0x00, 0x07, 0x00, 0x04, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7])
+                                setTimeout(() => {
+                                    thr_console("Sending payload");
+                                    thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x02, 0x00, 0x00, 0x03, 0x28, 0x72, 0x4d, 0x54, 0x5d, 0x00, 0x00, 0x00, 0xf7]);
+                                    setTimeout(() => {
+                                        thr_console("Retrieving settings");
+                                        thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x01, 0x02, 0x00, 0x00, 0x0b, 0x00, 0x0c, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x3c, 0x00, 0x7f, 0x7f, 0x7f, 0x7f, 0x00, 0x00, 0xf7]);
+                                    }, 500);
+                                }, 500);
+                            }, 500);
+                        }, 500);
+                    }, 500);
+
+                    addEventListener('click', (e) => {
+                        console.log(e);
+
+                        if (!("id" in e.srcElement.attributes)) {
+                            thr_console("Not a button");
+                            return;
+                        }
+
+                        if (e.srcElement.attributes.id.textContent == 'classic_lead') {
+                            thr_console("Classic Lead");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x04, 0x0c, 0x01, 0x00, 0x00, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                        } else 
+                        if (e.srcElement.attributes.id.textContent == 'classic_special') {
+                            thr_console("Classic Special");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x00, 0x0c, 0x01, 0x00, 0x00, 0x78, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                        } else 
+                        if (e.srcElement.attributes.id.textContent == 'classic_high_gain') {
+                            thr_console("Classic High Gain");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x00, 0x0c, 0x01, 0x00, 0x00, 0x7f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                        } else 
+                        if (e.srcElement.attributes.id.textContent == 'classic_crunch') {
+                            thr_console("Classic Crunch");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x04, 0x0c, 0x01, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                        } else 
+                        if (e.srcElement.attributes.id.textContent == 'classic_clean') {
+                            thr_console("Classic Clean");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x00, 0x0c, 0x01, 0x00, 0x00, 0x4a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                        } else 
+                        if (e.srcElement.attributes.id.textContent == 'classic_bass') {
+                            thr_console("Classic Bass");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x04, 0x0c, 0x01, 0x00, 0x00, 0x37, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                        } else 
+                        if (e.srcElement.attributes.id.textContent == 'classic_aco') {
+                            thr_console("Classic Acoustic");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x04, 0x0c, 0x01, 0x00, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                        } else 
+                        if (e.srcElement.attributes.id.textContent == 'flat') {
+                            thr_console("Flat");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x04, 0x0c, 0x01, 0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                        } else 
+                        if (e.srcElement.attributes.id.textContent == 'preset') {
+                            thr_console("Preset");
+                            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x03, 0x00, 0x00, 0x07, 0x00, 0x08, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7]);
+                            thr_out.send([0xF0, 0x00, 0x01, 0x0C, 0x24, 0x00, 0x4D, 0x00, 0x0C, 0x00, 0x01, 0x07, 0x00, 0x02, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF7]);
+                        }
+                    });
+                    //classic_lead = document.getElementById('classic_lead');
+                    //classic_lead.onclick = function(e) {
+                    //    console.log('classic lead');
+                    //}
+
+
+                    //console.log(thr_in);
+                    //console.log(thr_out);
+                    //console.log(thr_in.channels);
+                }
+            }, true);
+            //.then(onEnabled)
+            //.catch(err => console.log(err));
+
+        function set_classic_lead()
+        {
+            thr_out.send([0xf0, 0x00, 0x01, 0x0c, 0x24, 0x00, 0x4d, 0x00, 0x04, 0x00, 0x00, 0x07, 0x04, 0x0c, 0x01, 0x00, 0x00, 0x19, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xf7])
+        }    
+
+        function onEnabled() {
+            if (WebMidi.inputs.length < 1) {
+                c.innerHTML += "No device detected!";
+            } else {
+                WebMidi.inputs.forEach((device, index) => {
+                    c.innerHTML += `${index}: ${device.name} <br>`;
+                });
+            }
+
+            var thr = WebMidi.inputs[0];
+            thr.channels[1].addListener("sysex", e => {
+                console.log(e);
+            })
+        }
+    </script>
+</html>

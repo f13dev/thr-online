@@ -1,0 +1,51 @@
+body { background: #F8E3C7; color: #684C38; padding: 0; margin: 0; font-family: Arial, Helvetica, sans-serif; }
+header { background: #2F2219; position: absolute; top: 0; left: 0; right: 0; height: 45px; padding: 10px; }
+header h1 { padding: 0; margin: 0; line-height: 45px; text-align: center; color: #F8E3C7; }
+.container { padding: 10px; position: absolute; top: 65px; left: 0; right: 0; bottom: 0; overflow-y: auto; }
+
+.knob { content: url(./assets/knob.svg); width: 75px; height: 75px; }
+
+.led { width: 10px; height: 10px; background: #9c6f6f; border: 2px solid #000; border-radius: 50%; }
+.led.active { background: #ff0000; }
+
+.right .led { position: absolute; top: 0px; left: -10px; }
+
+.presets { position: absolute; top:5px; right: 10px; width: 300px; }
+.presets .preset { width: 30px; height: 30px; border-radius: 50%; margin: 0 13px; box-sizing: border-box; cursor: pointer; }
+.presets .user-memory { display: block; text-align: center; margin-top: 5px; }
+
+.controls_container { display: inline-block; height: 120px; padding: 10px 0; vertical-align: top; margin-top: 10px; }
+.controls_container .control {height: 120px; width: 100px; display: inline-block; position: relative; margin-top: -10px; }
+.controls_container .control .knob { position: absolute; top: 10px; left: 12.5px; }
+.controls_container .control .knob_label { position: absolute; width: 100px; top: 100px; text-align: center; font-size: 18px; font-weight: bold; }
+.controls_container .control .slider { width: 100px; position: absolute; top: 120px; }
+.controls_container .control .dots:after { font-size: 25px; color: #684c38; content: "\2022"; position: absolute; left: 70px; top: 72px; }
+.controls_container .control .dots:before { font-size: 25px; color: #684c38; content: "\2022"; position: absolute; left: 22px; top: 72px; }
+.controls_container .control .value { position: absolute; width: 100%; text-align: center; margin-top: -9px;}
+
+.model_control { width: 250px; padding: 10px 0; position: relative; } 
+.model_control .knob { position: absolute; top: 10px; left: 87.5px; }
+.model_control #classic_clean { width: 100px; margin-left: -100px; height: 10px; position: absolute; background: none; padding: 0px; top: 80px; left: 90px; text-align: right; padding-right: 10px; border: none; margin-top: -2px; }
+.model_control #classic_clean .led { position: absolute; top: 0; right: -10px; }
+.model_control #classic_special { width: 100px; margin-left: -100px; height: 10px; position: absolute; background: none; padding: 0px; top: 5px; left: 90px; text-align: right; padding-right: 10px; border: none; margin-top: -2px; }
+.model_control #classic_special .led { position: absolute; top: 0; right: -10px; }
+.model_control #classic_crunch { width: 100px; margin-left: -100px; height: 10px; position: absolute; background: none; padding: 0px; top: 65px; left: 75px; text-align: right; padding-right: 10px; border: none; margin-top: -2px; }
+.model_control #classic_crunch .led { position: absolute; top: 0; right: -10px; }
+.model_control #classic_high_gain { width: 100px; margin-left: -100px; height: 10px; position: absolute; background: none; padding: 0px; top: 25px; left: 75px; text-align: right; padding-right: 10px; border: none; margin-top: -2px; }
+.model_control #classic_high_gain .led { position: absolute; top: 0; right: -10px; }
+.model_control #classic_lead { width: 100px; margin-left: -100px; height: 10px; position: absolute; background: none; padding: 0px; top: 45px; left: 70px; text-align: right; padding-right: 10px; border: none; margin-top: -2px; }
+.model_control #classic_lead .led { position: absolute; top: 0; right: -10px; }
+.model_control #classic_aco { width: 100px; margin-left: 5px; height: 10px; border-radius: 50%; position: absolute; background: none; padding: 0px; top: 45px; left: 173px; text-align: left; padding-left: 10px; border: none; margin-top: -5px; }
+.model_control #classic_bass { width: 100px; margin-left: 5px; height: 10px; border-radius: 50%; position: absolute; background: none; padding: 0px; top: 25px; left: 168px; text-align: left; padding-left: 10px; border: none; margin-top: -5px; }
+.model_control #flat { width: 100px; margin-left: 5px; height: 10px; border-radius: 50%; position: absolute; background: none; padding: 0px; top: 65px; left: 168px; text-align: left; padding-left: 10px; border: none; margin-top: -5px; }
+.model_control input[type=range] { position: absolute; top: 100px; width: 100px; margin-left: calc(125px - 50px);}
+
+#console_toggle_label { position: absolute; bottom: 0px; right: 30px; height: 40px; width: 40px; background: #2F2219; transition: bottom 0.4s; border-radius: 7px 7px 0 0; cursor: pointer; }
+#console_toggle_label:after { content: "\21D1"; margin-left: 14px; margin-top: 8px; position: absolute; font-size: 24px; color: #f8e3c7; }
+#console {white-space: nowrap; pointer-events: none; position: absolute; left: 0; right: 0; bottom: 0; height: 0px; opacity: 1; transition: height 0.4s, opacity 0.4s; overflow-y: scroll; background: #222; color: #02db02; border-top: 4px solid #2F2219; font-family: "Lucida Console", "Menlo", "Monaco", "Courier", monospace; font-size: 14px; padding: 0px 10px; box-sizing: border-box; }
+#console_toggle:checked ~ #console { height: 300px; opacity: 1; pointer-events: unset; }
+#console_toggle:checked ~ #console_toggle_label:after { transform: rotate(180deg); }
+#console_toggle:checked ~ #console_toggle_label { bottom: 300px; }
+
+
+.slider {display: none;}
